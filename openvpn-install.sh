@@ -157,7 +157,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	echo
 	echo "Which protocol should OpenVPN use?"
 	echo "Automated install - defaulting to UDP on port 1194"
-	protocol = udp
+	protocol="udp"
 # 	echo "   1) UDP (recommended)"
 # 	echo "   2) TCP"
 # 	read -p "Protocol [1]: " protocol
@@ -200,7 +200,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 # 		read -p "DNS server [1]: " dns
 # 	done
 	
-	dns = 1
+	dns="1"
 
 	echo
 	echo "Enter a name for the first client:"
