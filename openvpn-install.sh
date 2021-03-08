@@ -109,11 +109,13 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		echo
 		echo "Which IPv4 address should be used?"
 		ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | nl -s ') '
-		read -p "IPv4 address [1]: " ip_number
-		until [[ -z "$ip_number" || "$ip_number" =~ ^[0-9]+$ && "$ip_number" -le "$number_of_ip" ]]; do
-			echo "$ip_number: invalid selection."
-			read -p "IPv4 address [1]: " ip_number
-		done
+# 		read -p "IPv4 address [1]: " ip_number
+# 		until [[ -z "$ip_number" || "$ip_number" =~ ^[0-9]+$ && "$ip_number" -le "$number_of_ip" ]]; do
+# 			echo "$ip_number: invalid selection."
+# 			read -p "IPv4 address [1]: " ip_number
+# 		done
+		echo "Automated install - defaulting to 1"
+		ip_number="1"
 		[[ -z "$ip_number" ]] && ip_number="1"
 		ip=$(ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}' | sed -n "$ip_number"p)
 	fi
@@ -123,13 +125,16 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 		echo "This server is behind NAT. What is the public IPv4 address or hostname?"
 		# Get public IP and sanitize with grep
 		get_public_ip=$(grep -m 1 -oE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' <<< "$(wget -T 10 -t 1 -4qO- "http://ip1.dynupdate.no-ip.com/" || curl -m 10 -4Ls "http://ip1.dynupdate.no-ip.com/")")
-		read -p "Public IPv4 address / hostname [$get_public_ip]: " public_ip
-		# If the checkip service is unavailable and user didn't provide input, ask again
-		until [[ -n "$get_public_ip" || -n "$public_ip" ]]; do
-			echo "Invalid input."
-			read -p "Public IPv4 address / hostname: " public_ip
-		done
-		[[ -z "$public_ip" ]] && public_ip="$get_public_ip"
+# 		read -p "Public IPv4 address / hostname [$get_public_ip]: " public_ip
+# 		# If the checkip service is unavailable and user didn't provide input, ask again
+# 		until [[ -n "$get_public_ip" || -n "$public_ip" ]]; do
+# 			echo "Invalid input."
+# 			read -p "Public IPv4 address / hostname: " public_ip
+# 		done
+# 		[[ -z "$public_ip" ]] && public_ip="$get_public_ip"
+		
+		echo "Automated install, using public IP $get_public_ip"
+		public_ip="$get_public_ip"
 	fi
 	# If system has a single IPv6, it is selected automatically
 	if [[ $(ip -6 addr | grep -c 'inet6 [23]') -eq 1 ]]; then
@@ -151,29 +156,35 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	fi
 	echo
 	echo "Which protocol should OpenVPN use?"
-	echo "   1) UDP (recommended)"
-	echo "   2) TCP"
-	read -p "Protocol [1]: " protocol
-	until [[ -z "$protocol" || "$protocol" =~ ^[12]$ ]]; do
-		echo "$protocol: invalid selection."
-		read -p "Protocol [1]: " protocol
-	done
-	case "$protocol" in
-		1|"") 
-		protocol=udp
-		;;
-		2) 
-		protocol=tcp
-		;;
-	esac
+	echo "Automated install - defaulting to UDP on port 1194"
+	protocol = udp
+# 	echo "   1) UDP (recommended)"
+# 	echo "   2) TCP"
+# 	read -p "Protocol [1]: " protocol
+# 	until [[ -z "$protocol" || "$protocol" =~ ^[12]$ ]]; do
+# 		echo "$protocol: invalid selection."
+# 		read -p "Protocol [1]: " protocol
+# 	done
+# 	case "$protocol" in
+# 		1|"") 
+# 		protocol=udp
+# 		;;
+# 		2) 
+# 		protocol=tcp
+# 		;;
+# 	esac
 	echo
 	echo "What port should OpenVPN listen to?"
-	read -p "Port [1194]: " port
-	until [[ -z "$port" || "$port" =~ ^[0-9]+$ && "$port" -le 65535 ]]; do
-		echo "$port: invalid port."
-		read -p "Port [1194]: " port
-	done
-	[[ -z "$port" ]] && port="1194"
+	echo "Automated install - defaulting to UDP port 1194"
+# 	read -p "Port [1194]: " port
+# 	until [[ -z "$port" || "$port" =~ ^[0-9]+$ && "$port" -le 65535 ]]; do
+# 		echo "$port: invalid port."
+# 		read -p "Port [1194]: " port
+# 	done
+# 	[[ -z "$port" ]] && port="1194"
+
+	port="1194"
+
 	echo
 	echo "Select a DNS server for the clients:"
 	echo "   1) Current system resolvers"
@@ -182,17 +193,25 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	echo "   4) OpenDNS"
 	echo "   5) Quad9"
 	echo "   6) AdGuard"
-	read -p "DNS server [1]: " dns
-	until [[ -z "$dns" || "$dns" =~ ^[1-6]$ ]]; do
-		echo "$dns: invalid selection."
-		read -p "DNS server [1]: " dns
-	done
+	echo "Automated install - defaulting to current system resolvers"
+# 	read -p "DNS server [1]: " dns
+# 	until [[ -z "$dns" || "$dns" =~ ^[1-6]$ ]]; do
+# 		echo "$dns: invalid selection."
+# 		read -p "DNS server [1]: " dns
+# 	done
+	
+	dns = 1
+
 	echo
 	echo "Enter a name for the first client:"
-	read -p "Name [client]: " unsanitized_client
-	# Allow a limited set of characters to avoid conflicts
-	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
-	[[ -z "$client" ]] && client="client"
+	echo "Automated install, defaulting to first_client"
+# 	read -p "Name [client]: " unsanitized_client
+# 	# Allow a limited set of characters to avoid conflicts
+# 	client=$(sed 's/[^0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-]/_/g' <<< "$unsanitized_client")
+# 	[[ -z "$client" ]] && client="client"
+
+	client="first_client"
+
 	echo
 	echo "OpenVPN installation is ready to begin."
 	# Install a firewall in the rare case where one is not already available
@@ -207,7 +226,7 @@ if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 			firewall="iptables"
 		fi
 	fi
-	read -n1 -r -p "Press any key to continue..."
+# 	read -n1 -r -p "Press any key to continue..."
 	# If running inside a container, disable LimitNPROC to prevent conflicts
 	if systemd-detect-virt -cq; then
 		mkdir /etc/systemd/system/openvpn-server@server.service.d/ 2>/dev/null
