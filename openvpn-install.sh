@@ -100,7 +100,7 @@ new_client () {
 
 if [[ ! -e /etc/openvpn/server/server.conf ]]; then
 	clear
-	echo 'Welcome to this OpenVPN road warrior installer!'
+	echo 'Welcome to Vitae EC2 VPN Edge Instance Launch Configuration.'
 	# If system has a single IPv4, it is selected automatically. Else, ask the user
 	if [[ $(ip -4 addr | grep inet | grep -vEc '127(\.[0-9]{1,3}){3}') -eq 1 ]]; then
 		ip=$(ip -4 addr | grep inet | grep -vE '127(\.[0-9]{1,3}){3}' | cut -d '/' -f 1 | grep -oE '[0-9]{1,3}(\.[0-9]{1,3}){3}')
