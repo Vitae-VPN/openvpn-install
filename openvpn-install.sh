@@ -41,7 +41,7 @@ elif [[ -e /etc/fedora-release ]]; then
 else
 	echo "This installer seems to be running on an unsupported distribution.
 Supported distributions are Ubuntu, Debian, CentOS, and Fedora."
-	exit
+# 	exit
 fi
 
 if [[ "$os" == "ubuntu" && "$os_version" -lt 1804 ]]; then
